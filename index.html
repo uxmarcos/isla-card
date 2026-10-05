@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Isla · Cartão 3D</title>
+<meta name="theme-color" content="#0A0A0A">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500&family=Manrope:wght@500;600;700&display=swap">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.184.0/build/three.module.js",
+    "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js",
+    "three/addons/exporters/OBJExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js",
+    "three/addons/exporters/GLTFExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js"
+  },
+  "integrity": {
+    "https://unpkg.com/three@0.184.0/build/three.module.js": "sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J",
+    "https://unpkg.com/three@0.184.0/build/three.core.js": "sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT",
+    "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js": "sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js": "sha384-nbwtoZENJD3Vq+ACK0CuGQdPMuDWHkamC2KJD70EV5nfg6jQjfppKOea07YJN+N3",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js": "sha384-VofkvpG6HERhFCYbsUOHeNXBCqID2nfqkQqnVzE1jc/oPcz+qJ13ADdXH08hE+cQ"
+  }
+}
+</script>
+<style>
+html,body{margin:0;height:100%;background:#0A0A0A;color:#F5F5F2;font-family:'Inter Tight',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+a{color:#F5F5F2}a:hover{color:#A3A3A3}
+three-d-stage:not(:defined){visibility:hidden}
+three-d-stage{position:fixed;inset:0;width:100vw;height:100vh}
+#panel{position:fixed;top:16px;left:16px;width:236px;max-height:calc(100vh - var(--bar,180px) - 48px);overflow:auto;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:20px;background:linear-gradient(180deg,rgb(245 245 242/.05),rgb(245 245 242/.02)),#121212;border:1px solid rgb(245 245 242/.10);box-shadow:inset 0 1px 0 rgb(245 245 242/.09),0 30px 60px -30px rgb(0 0 0/.8);z-index:5}
+#panel h1{margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:26px;line-height:1;letter-spacing:-0.01em}
+#panel h1 em{color:#A3A3A3}
+.grp{display:flex;flex-direction:column;gap:7px}
+.lbl{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:#A3A3A3}
+.lbl:before{content:"";width:18px;height:1px;background:#6B6B6B}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{appearance:none;font:500 12px 'Inter Tight',sans-serif;height:28px;padding:0 11px;border-radius:999px;border:1px solid rgb(245 245 242/.18);background:transparent;color:#F5F5F2;cursor:pointer;transition:all .5s cubic-bezier(.16,1,.3,1)}
+.chips button:hover{border-color:rgb(245 245 242/.5);background:rgb(245 245 242/.04)}
+.chips button[aria-pressed="true"]{background:#F5F5F2;color:#0A0A0A;border-color:#F5F5F2;box-shadow:0 0 30px rgb(245 245 242/.18)}
+.hint{font-size:12px;line-height:1.5;color:#6B6B6B}
+#verso h1{margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:26px;line-height:1}
+#verso{position:fixed;top:16px;right:16px;width:236px;max-height:calc(100vh - var(--bar,180px) - 48px);overflow:auto;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:20px;background:linear-gradient(180deg,rgb(245 245 242/.05),rgb(245 245 242/.02)),#121212;border:1px solid rgb(245 245 242/.10);box-shadow:inset 0 1px 0 rgb(245 245 242/.09),0 30px 60px -30px rgb(0 0 0/.8);z-index:5}
+#order{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;width:min(820px,calc(100vw - 32px));box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,0.8fr);gap:0;padding:0;border-radius:20px;background:linear-gradient(180deg,rgb(245 245 242/.05),rgb(245 245 242/.02)),#121212;border:1px solid rgb(245 245 242/.10);box-shadow:inset 0 1px 0 rgb(245 245 242/.09),0 30px 60px -30px rgb(0 0 0/.8);z-index:5;max-height:46vh;overflow:auto}
+.ocol{display:flex;flex-direction:column;gap:8px;padding:12px 16px;min-width:0}
+.ocol+.ocol{border-left:1px solid rgb(245 245 242/.08)}
+.pdesc{font-size:11.5px;line-height:1.45;color:#A3A3A3;margin-top:-4px}
+.pdesc b{color:#F5F5F2;font-weight:500}
+.ptot{gap:6px}
+#p-val{font-family:'Instrument Serif',serif;font-size:28px;line-height:1;letter-spacing:-0.01em;font-variant-numeric:tabular-nums}
+#p-unit{font-size:13px;color:#A3A3A3}
+.spec{display:flex;flex-direction:column;gap:3px;font-size:11.5px;line-height:1.4;color:#A3A3A3}
+.spec b{font-weight:500;color:#F5F5F2}
+.note{font-size:11px;line-height:1.45;color:#6B6B6B}
+.refs{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11.5px}
+.refs a{color:#6B6B6B;text-decoration:none;border-bottom:1px solid rgb(245 245 242/.12)}.refs a:hover{color:#F5F5F2}
+.chips button[disabled]{opacity:.3;pointer-events:none}
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0A0A0A"/><circle cx="50" cy="50" r="20" fill="none" stroke="#F5F5F2" stroke-width="6"/></svg></template>
+<three-d-stage name="isla-cartao-marcos" background="radial-gradient(120% 100% at 50% 0%, #F4F4F1 0%, #E4E4E0 55%, #CFCFCB 100%)"></three-d-stage>
+<div id="panel">
+  <h1>Frente</h1>
+  <div class="grp"><div class="lbl">Layout</div><div class="chips" id="c-flay"></div></div>
+  <div class="grp"><div class="lbl">Acabamento</div><div class="chips" id="c-frente"></div></div>
+  <div class="hint">Mova o mouse para mover a luz. Arraste para girar os cartões.</div>
+</div>
+<div id="verso">
+  <h1>Verso</h1>
+  <div class="grp"><div class="lbl">Layout</div><div class="chips" id="c-blay"></div></div>
+  <div class="grp"><div class="lbl">Acabamento</div><div class="chips" id="c-verso"></div></div>
+</div>
+<div id="order">
+  <div class="ocol">
+    <div class="grp"><div class="lbl">Papel</div><div class="chips" id="c-paper"></div></div>
+    <div class="pdesc" id="p-desc"></div>
+    <div class="grp"><div class="lbl">Quantidade</div><div class="chips" id="c-qty"></div></div>
+  </div>
+  <div class="ocol omid">
+    <div class="lbl">Seu cartão</div>
+    <div class="spec" id="p-spec"></div>
+    <div class="note" id="p-note"></div>
+  </div>
+  <div class="ocol ptot">
+    <div class="lbl">Preço estimado · SP</div>
+    <div id="p-val"></div><div id="p-unit"></div>
+    <div class="refs" id="p-refs"></div>
+  </div>
+</div>
+<script src="three-d-stage.js"></script>
+<script type="module">
+const stage = document.querySelector('three-d-stage');
+const { THREE } = await stage.ready;
+await Promise.all(['400 100px "Instrument Serif"','italic 400 100px "Instrument Serif"','300 40px "Inter Tight"','400 40px "Inter Tight"','500 40px "Inter Tight"','600 100px "Manrope"','700 100px "Manrope"'].map(f=>document.fonts.load(f)));
+const LOGO = new Path2D("M536.142 100.408C617.823 97.3663 698.237 109.907 743.553 186.745C756.025 213.541 775.181 225.944 789.001 234.891C793.956 238.099 798.226 240.863 801.255 243.687C806.547 248.768 822.139 257.196 838.854 266.23C860.509 277.935 884.049 290.657 889.513 298.438C935.357 362.84 941.558 400.973 939.736 478.121C924.704 552.361 864.077 728.198 741.826 837.625C667.606 878.783 603.995 909.886 519.418 903.391C517.088 903.234 514.745 903.081 512.393 902.928C495.809 901.845 478.784 900.733 462.601 897.943C448.638 895.856 435.057 892.397 421.46 888.934C413.603 886.934 405.74 884.931 397.794 883.191C393.115 882.167 388.502 881.167 383.95 880.18C312.138 864.608 255.563 852.34 197.169 799.905C186.247 790.098 177.864 778.594 169.309 766.854C168.365 765.559 167.418 764.26 166.466 762.961C130.765 714.231 103.943 660.403 100.591 599.023C99.1833 573.235 100.269 545.83 104.066 520.261C105.214 512.527 106.757 504.852 108.298 497.179C109.433 491.532 110.567 485.885 111.545 480.216C112.767 473.126 114.01 466.033 115.255 458.936C120.316 430.063 125.388 401.13 129.096 372.092C131.388 354.152 132.749 336.234 134.117 318.246C134.36 315.045 134.604 311.841 134.853 308.635C135.019 306.497 135.177 304.355 135.335 302.213C136.393 287.821 137.456 273.36 141.168 259.384C146.922 237.711 157.833 215.982 172.88 199.276C248.503 115.318 410.692 106.912 524.641 101.007C528.533 100.805 532.369 100.607 536.142 100.408ZM555.762 203.891C476.003 153.946 378.379 114.173 298.817 164.432C181.783 238.364 127.873 357.796 169.755 514.099C203.015 638.229 260.425 729.632 324.502 798.629C425.379 907.252 603.535 847.893 708.123 742.837C817.866 632.602 923.863 546.139 887.856 411.759C841.921 240.326 720.719 307.186 555.762 203.891Z");
+let G1, G2, POR, LINE;
+function setInk(white){ if(white){ G1='#55554F'; G2='#8A8A85'; POR='#0A0A0A'; LINE='rgba(10,10,10,0.16)'; } else { G1='#A3A3A3'; G2='#6B6B6B'; POR='#F5F5F2'; LINE='rgba(245,245,242,0.14)'; } }
+setInk(false);
+const SERIF='"Instrument Serif", serif', SANS='"Inter Tight", sans-serif';
+const R=1020; // right margin x on the 1100×600 artboard (88×48 mm)
+function logo(ctx, x, y, h){ const s=h/925; ctx.save(); ctx.translate(x-40*s, y-40*s); ctx.scale(s,s); ctx.fill(LOGO, 'evenodd'); ctx.restore(); }
+function text(ctx, str, x, y, font, color, opts={}){ ctx.font=font; ctx.fillStyle=color; ctx.letterSpacing=opts.ls||'0px'; ctx.textAlign=opts.align||'left'; ctx.fillText(str,x,y); const w=ctx.measureText(str).width; ctx.letterSpacing='0px'; ctx.textAlign='left'; return w; }
+function rect(ctx,x,y,w,h,c){ ctx.fillStyle=c; ctx.fillRect(x,y,w,h); }
+// layer 'foil' = enobrecimento area (white mask); 'print' = impressão comum
+function lockup(ctx, L, x, baseline, h){ if(L!=='foil') return; ctx.fillStyle='#fff'; const lw=h*960/925; logo(ctx, x, baseline-h, h); text(ctx,'isla', x+lw+h*0.112, baseline, `italic 400 ${h*1.53}px ${SERIF}`, '#fff', {ls:`${-h*0.03}px`}); }
+function backClassic(ctx, L, o){
+  const F=L==='foil', P=L==='print'; let x=80, y=150, w;
+  if(o.sans){ ctx.font=`300 82px ${SANS}`; ctx.letterSpacing='-3px'; w=ctx.measureText('Marcos').width; ctx.letterSpacing='0px'; if(P) text(ctx,'Marcos',x,y,`300 82px ${SANS}`,G1,{ls:'-3px'}); x+=w+18; }
+  else { ctx.font=`400 96px ${SERIF}`; w=ctx.measureText('Marcos ').width; if(P) text(ctx,'Marcos',x,y,`400 96px ${SERIF}`,G1,{ls:'-2px'}); x+=w-8; }
+  const nf=`italic 400 ${o.sans?100:96}px ${SERIF}`; ctx.font=nf; ctx.letterSpacing='-2px'; const hw=ctx.measureText('Hollmann').width; ctx.letterSpacing='0px';
+  if((o.foilName&&F)||(!o.foilName&&P)) text(ctx,'Hollmann',x,y,nf,F?'#fff':POR,{ls:'-2px'});
+  if(P){ rect(ctx,x+hw+40,y-34,R-(x+hw+40),1.5,LINE);
+    rect(ctx,80,191,34,1.5,G2); text(ctx,'CEO @ ISLA',128,199,`400 22px ${SANS}`,G1,{ls:'0.9px'});
+    text(ctx,'EMAIL',80,446,`400 15px ${SANS}`,G2,{ls:'0.6px'}); rect(ctx,80,466,R-80,1.5,LINE);
+    text(ctx,'TELEFONE',80,512,`400 15px ${SANS}`,G2,{ls:'0.6px'}); rect(ctx,80,532,R-80,1.5,LINE); }
+  if((o.foilValues&&F)||(!o.foilValues&&P)){ const c=F?'#fff':POR;
+    text(ctx,'marcos@isla.to',R,448,`300 33px ${SANS}`,c,{align:'right'});
+    text(ctx,'+55 (11) 94826-0209',R,514,`300 33px ${SANS}`,c,{align:'right'}); }
+}
+// Isobatas: linhas de mesma profundidade ao redor da costa. Perto da costa ficam mais juntas e seguem o contorno;
+// mais longe, ficam espaçadas e generalizadas. A cada 5 linhas, uma isóbata-mestra mais grossa com a profundidade.
+let ISLAND_R=null;
+function islandRadii(){ if(ISLAND_R) return ISLAND_R; const cv=document.createElement('canvas').getContext('2d'); const cx0=520, cy0=502, out=[];
+  for(let i=0;i<360;i++){ const a=i/360*Math.PI*2; let rr=0; for(let d=480; d>0; d-=1.5){ if(cv.isPointInPath(LOGO, cx0+Math.cos(a)*d, cy0+Math.sin(a)*d, 'nonzero')){ rr=d; break; } } out.push(rr); }
+  return ISLAND_R={r:out,cx:cx0,cy:cy0}; }
+function rng(seed){ return ()=>{ seed=(seed*16807)%2147483647; return (seed-1)/2147483646; }; }
+function seaFront(c, L){
+  const H0=228, s=H0/925, X=550, Y=300, I=islandRadii(), mean=I.r.reduce((a,b)=>a+b,0)/360;
+  if(L==='foil'){ c.fillStyle='#fff'; c.save(); c.translate(X-I.cx*s, Y-I.cy*s); c.scale(s,s); c.fill(LOGO,'evenodd'); c.restore(); return; }
+  if(L!=='print') return;
+  const rand=rng(7), N=24, waves=[1,2,3,4,5,7].map(j=>({j,ph:rand()*6.28,w:(rand()-0.5)*0.5,a:1/(j*0.9)}));
+  const pts=k=>{ const o=7*Math.pow(k,1.42), t=Math.min(1,k/12), amp=1.5+k*1.1, stretch=1+0.42*Math.min(1,k/N); const P=[];
+    for(let i=0;i<360;i+=2){ const a=i/360*Math.PI*2; const base=(I.r[i]*(1-t)+mean*t)*s + 3;
+      let n=0; waves.forEach(w=>n+=w.a*Math.sin(w.j*a+w.ph+k*w.w)); const rr=base+o+n*amp;
+      P.push([X+Math.cos(a)*rr*stretch, Y+Math.sin(a)*rr]); } return P; };
+  c.save(); c.lineJoin='round';
+  const labels={5:'10',10:'20',15:'50',20:'100'};
+  for(let k=1;k<=N;k++){ const P=pts(k), idx=k%5===0;
+    c.beginPath(); P.forEach((p,i)=>{ const q=P[(i+1)%P.length]; const m=[(p[0]+q[0])/2,(p[1]+q[1])/2]; if(i===0) c.moveTo(m[0],m[1]); else c.quadraticCurveTo(p[0],p[1],m[0],m[1]); }); c.closePath();
+    c.setLineDash(k===N-1||k===N-3?[5,6]:[]); c.lineWidth=idx?1.7:1; c.strokeStyle=idx?'rgba(245,245,242,0.17)':'rgba(245,245,242,0.085)'; c.stroke();
+    if(labels[k]){ const p=P[[150,20,120,40][(k/5-1)%4]]; const tw=c.measureText(labels[k]).width; c.save(); c.globalCompositeOperation='destination-out'; c.fillRect(p[0]-12,p[1]-8,24,16); c.restore();
+      c.setLineDash([]); text(c,labels[k],p[0],p[1]+4.5,`400 12px ${SANS}`,'rgba(245,245,242,0.32)',{align:'center'}); }
+  }
+  c.setLineDash([]);
+  [[150,95,'23'],[300,520,'41'],[880,90,'38'],[990,470,'67'],[760,545,'52'],[95,330,'61'],[1010,250,'74']].forEach(([x,y,t])=>text(c,t,x,y,`italic 400 13px ${SERIF}`,'rgba(245,245,242,0.26)',{align:'center'}));
+  c.restore();
+}
+function lockupSans(ctx, L, x, baseline, h){ if(L!=='foil') return; ctx.fillStyle='#fff'; const lw=h*960/925; logo(ctx, x, baseline-h, h);
+  text(ctx,'isla', x+lw+h*0.14, baseline, `600 ${h*1.34}px "Manrope", sans-serif`, '#fff', {ls:`${-h*0.06}px`}); }
+const FRONTS = [
+  { id:'f1', name:'Lockup', draw:(c,L)=>lockup(c,L,-113,566,268) },
+  { id:'f6', name:'Lockup Manrope', draw:(c,L)=>lockupSans(c,L,-113,566,268) },
+  { id:'f5', name:'Mar', draw:seaFront },
+  { id:'f4', name:'Símbolo', draw:(c,L)=>{ if(L==='foil'){ c.fillStyle='#fff'; logo(c,436,186,228); } } },
+];
+const BACKS = [
+  { id:'b1', name:'Serif', draw:(c,L)=>backClassic(c,L,{foilName:true}) },
+  { id:'b2', name:'Sans', draw:(c,L)=>backClassic(c,L,{sans:true,foilName:true}) },
+  { id:'b4', name:'Grid', draw:(c,L)=>{ if(L==='foil') text(c,'Marcos Hollmann',80,126,`400 76px ${SERIF}`,'#fff',{ls:'-1px'});
+      if(L==='print'){ rect(c,80,166,34,1.5,G2); text(c,'CEO @ ISLA',128,174,`400 22px ${SANS}`,G1,{ls:'0.9px'});
+        rect(c,80,222,R-80,1.5,LINE); rect(c,500,222,1.5,378,LINE); rect(c,760,222,1.5,378,LINE);
+        text(c,'MARCOS@ISLA.TO',80,486,`400 23px ${SANS}`,POR,{ls:'1.4px'});
+        text(c,'+55 (11) 94826-0209',80,522,`400 23px ${SANS}`,POR,{ls:'1.4px'});
+        text(c,'ISLA.TO',784,522,`400 21px ${SANS}`,G2,{ls:'1.4px'}); } } },
+];
+// Papéis reais vendidos em SP. Couchê impresso em preto tem miolo branco (borda branca); Color Plus é tingido na massa.
+const PAPERS = {
+  fosca:     { name:'Couchê fosco', color:'#0A0A0A', rough:0.82, edge:'#E9E8E3', spec:'Couchê 300g, impressão 4x4, laminação fosca BOPP', desc:'Filme plástico fosco sobre papel branco impresso. Liso, sem reflexo, aceita foil e verniz. Borda branca.' },
+  soft:      { name:'Couchê soft touch', color:'#0A0A0A', rough:0.95, edge:'#E9E8E3', spec:'Couchê 300g, impressão 4x4, laminação soft touch (toque aveludado)', desc:'Como o fosco, com toque aveludado. Preto mais profundo, foil com mais contraste. Marca digital. Borda branca.' },
+  colorplus: { name:'Color Plus preto',    color:'#111111', rough:0.97, edge:'#111111', spec:'Color Plus Preto 300g (tingido na massa, sem impressão CMYK)', desc:'Papel tingido de preto, borda preta e textura natural. Sem verniz nem CMYK: só foil ou tinta branca.' },
+};
+const FINISH = {
+  hot:   { name:'Hot stamping prata', color:'#ECECE8', rough:0.24, metal:1, bump:-0.25 },
+  uv:    { name:'Verniz UV localizado', color:null, rough:0.04, metal:0, bump:0.35 },
+  print: { name:'Só impressão', color:'#F5F5F2', rough:null, metal:0, bump:0 },
+};
+const S = Object.assign({ fl:'f1', bl:'b1', bc:'preto', paper:'fosca', frente:'hot', verso:'print', qty:500, light:'mouse' }, JSON.parse(localStorage.getItem('isla-card-3d-v3')||'{}'));
+if(!S.seaDefault){ S.fl='f5'; S.seaDefault=1; localStorage.setItem('isla-card-3d-v3', JSON.stringify(S)); }
+const save=()=>localStorage.setItem('isla-card-3d-v3', JSON.stringify(S));
+function validate(){ S.bc='preto'; if(!BACKS.some(b=>b.id===S.bl)) S.bl='b1'; if(!FRONTS.some(f=>f.id===S.fl)) S.fl='f1'; if(S.paper==='colorplus'){ S.bc='preto'; if(S.frente==='uv') S.frente='hot'; if(S.verso==='uv') S.verso='print'; } }
+
+// ---------- preço (500 un., R$, gráficas online que atendem SP capital — out/2026)
+const REF = {
+  printi:['Printi','https://www.printi.com.br/cartao-de-visita-hot-stamping/'],
+  atual:['Atual Card','https://www.atualcard.com.br/cartao-de-visita/74'],
+  futura:['FuturaIM','https://www.futuraim.com.br/produto/cartao-de-visita-em-couche-fosco-com-laminacao-fosca-e-verniz-localizado'],
+  futurahs:['FuturaIM','https://www.futuraim.com.br/produto/cartao-de-visita-em-hot-stamping'],
+  gsp:['Gráficas em SP','https://www.graficasemsp.com.br/cartao-de-visita-hot-stamping.html'],
+  papira:['Papira','https://www.papira.com.br/cartao-de-visita-com-hot-stamping-e-verniz-localizado-8-7x4-7-cm'],
+  paulista:['Gráfica Paulista','https://www.paulistacartoes.com.br/cartao-de-visita-com-verniz-localizado-e-hot-stamping/1754/2428'],
+  klm:['KLM Gráfica','https://www.klmgrafica.com.br/produto/2-cartao-de-visita-laminado-fosco-bopp-com-ou-sem-verniz-localizado'],
+  marcaqui:['Marcaqui','https://www.marcaqui.com.br/cartao-soft-touch'],
+  godtime:['Godtime','https://godtimepapelaria.com.br/produtos/cartao-de-visitas-laminacao-soft-touch-e-hot-stamping/'],
+  proarte:['Proarte','https://www.graficaproarte.com.br/cartao-de-visita-soft-touch-verniz-localizado'],
+  giv:['GIV Online','https://www.givonline.com.br/produto/cartao-de-visita-em-couche-fosco-com-laminacao-fosca'],
+  profix:['Profix','https://www.profixdigital.com.br/cartao-de-visita-laminacao-fosca-500un'],
+  brasil7:['Gráfica Brasil 7','https://www.graficabrasil7.com/produto/cartao-de-visita-fosco-9x5-cm-couche-300g-laminacao-fosca-corte-reto-4x4-impressao-frente-e-verso-6209'],
+  dking:['DKing','https://dkingvisual.lojavirtualnuvem.com.br/produtos/cartao-300g-lam-fosca-hot-stamping/'],
+  maxcolor:['MaxColor','https://www.maxcolor.com.br/produto/cartao-de-visita-48x88cm-couche-300g-laminacao-fosca-e-verniz-localizado'],
+  tsuru:['Tsuru Paper','https://www.tsurupaper.com.br/cartao-de-visita-couche-preto-300g-personalizado'],
+};
+function quote(){
+  const hot=(S.frente==='hot')+(S.verso==='hot'), uv=(S.frente==='uv')+(S.verso==='uv');
+  let q;
+  if(S.paper==='colorplus'){
+    const extra = hot===2 || S.frente==='print' || S.verso==='print';
+    q={min:660, from:true, refs:['tsuru'], prazo:'até 15 dias úteis',
+       note: extra ? 'Referência: hot stamping 1 cor em 1 lado. O segundo lado (hot stamping ou tinta branca em serigrafia) é cobrado à parte, sob orçamento. Color Plus não aceita CMYK nem verniz: tudo que não é foil sai em tinta branca chapada (sem cinzas).' : 'Hot stamping 1 cor, 1 lado.'};
+  } else {
+    // Couchê 300g 4x4 + laminação fosca, 500 un. Faixas tiradas de lojas que vendem as duas versões (com e sem o acabamento),
+    // para que cada acabamento sempre custe mais que o anterior.
+    const T = {
+      base:  {min:92,  max:150, refs:['giv','profix','brasil7'], prazo:'3 dias úteis'},
+      uv:    {min:101, max:220, refs:['futura','profix','dking'], prazo:'2–5 dias úteis'},
+      hot:   {min:172, max:300, refs:['printi','futurahs','atual','gsp'], prazo:'4–12 dias úteis'},
+      hotuv: {min:279, max:400, refs:['papira','atual','dking'], prazo:'5–7 dias úteis', note:'Manter 0,6 mm de distância entre as áreas de verniz e de hot stamping.'},
+      hot2:  {min:340, max:340, refs:['gsp'], prazo:'7–10 dias úteis', note:'Hot stamping nos dois lados: só uma gráfica online com preço publicado.'},
+    };
+    const k = hot===2?'hot2' : hot===1&&uv===1?'hotuv' : hot===1?'hot' : uv>0?'uv' : 'base';
+    q = Object.assign({}, T[k]);
+    if(S.paper==='soft'){
+      if(k==='hot') Object.assign(q,{min:187,max:295,refs:['futurahs','maxcolor','godtime']});
+      else { q.min+=30; q.max+=60; q.est=true; q.note=((q.note||'')+' Soft touch estimado como laminação fosca + R$ 30–60.').trim(); }
+    }
+  }
+  if(S.qty===1000){ const f=S.paper==='colorplus'?1.7:1.5; q.min=Math.round(q.min*f); if(q.max) q.max=Math.round(q.max*f); q.est=q.est||S.paper!=='colorplus'; }
+  return q;
+}
+const brl=n=>'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+const brl2=n=>n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+function renderPrice(){
+  const q=quote(), n=S.qty;
+  document.getElementById('p-val').innerHTML = q.from ? '<span style="font-family:Inter Tight,sans-serif;font-size:13px;color:#A3A3A3">a partir de </span>'+brl(q.min) : (q.min===q.max ? '≈ '+brl(q.min) : brl(q.min)+' – '+brl(q.max).replace('R$ ',''));
+  document.getElementById('p-unit').textContent = (q.from||q.min===q.max ? 'R$ '+brl2(q.min/n) : 'R$ '+brl2(q.min/n)+' – '+brl2(q.max/n))+' por cartão · '+n.toLocaleString('pt-BR')+' un.'+(q.est?' · estimativa':'');
+  const p=PAPERS[S.paper];
+  document.getElementById('p-desc').innerHTML='<b>'+p.name+'.</b> '+p.desc;
+  document.getElementById('p-spec').innerHTML = [
+    ['Papel', p.spec], ['Frente', FINISH[S.frente].name+(S.paper==='colorplus'&&S.frente==='print'?' (tinta branca)':'')], ['Verso', FINISH[S.verso].name+(S.paper==='colorplus'&&S.verso==='print'?' (tinta branca)':'')],
+    ['Formato', '88 × 48 mm, cantos retos'], ['Produção', q.prazo+' + frete'] ].map(([k,v])=>'<div><b>'+k+'</b> · '+v+'</div>').join('');
+  const note=document.getElementById('p-note');
+  const ladder = S.paper==='colorplus' ? '' : 'Do mais barato ao mais caro (500 un.): só impressão R$ 92–150 · verniz UV R$ 101–220 · hot stamping R$ 172–300 · hot stamping + verniz R$ 279–400.';
+  note.textContent=[q.note, ladder].filter(Boolean).join(' '); note.style.display=note.textContent?'':'none';
+  document.getElementById('p-refs').innerHTML = q.refs.map(r=>'<a href="'+REF[r][1]+'" target="_blank" rel="noopener">'+REF[r][0]+'</a>').join('');
+}
+
+// ---------- textures (1100×600 artboard → 88×48 mm)
+const W=2200, H=1200;
+function mk(){ const c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d'); x.scale(W/1100,H/600); return [c,x]; }
+function tinted(mask, style){ const [c,x]=mk(); x.setTransform(1,0,0,1,0,0); x.drawImage(mask,0,0); x.globalCompositeOperation='source-in'; x.fillStyle=style; x.fillRect(0,0,W,H); return c; }
+function buildFace(drawFn, finKey, white){
+  const p=PAPERS[S.paper], fin=FINISH[finKey], base=white?'#F2F2EE':p.color;
+  const [mask,mx]=mk(); drawFn(mx,'foil');
+  const [print,px]=mk(); drawFn(px,'print');
+  if(S.paper==='colorplus'){ mx.setTransform(1,0,0,1,0,0); mx.drawImage(tinted(print,'#fff'),0,0); px.setTransform(1,0,0,1,0,0); px.clearRect(0,0,W,H);
+    if(finKey!=='print'){ const [pm,pmx]=mk(); drawFn(pmx,'print'); px.drawImage(tinted(pm,POR),0,0); mx.setTransform(1,0,0,1,0,0); mx.clearRect(0,0,W,H); drawFn((mx.setTransform(W/1100,0,0,H/600,0,0),mx),'foil'); } }
+  const [col,cx]=mk(); cx.setTransform(1,0,0,1,0,0); cx.fillStyle=base; cx.fillRect(0,0,W,H); cx.drawImage(print,0,0);
+  const [rm,rx]=mk(); rx.setTransform(1,0,0,1,0,0); rx.fillStyle=`rgb(0,${Math.round(p.rough*255)},0)`; rx.fillRect(0,0,W,H);
+  const fr=fin.rough??p.rough;
+  cx.drawImage(tinted(mask, finKey==='print'?POR:(fin.color||base)),0,0);
+  rx.drawImage(tinted(mask, `rgb(0,${Math.round(fr*255)},${Math.round(fin.metal*255)})`),0,0);
+  const map=new THREE.CanvasTexture(col); map.colorSpace=THREE.SRGBColorSpace; map.anisotropy=8;
+  const rmt=new THREE.CanvasTexture(rm); rmt.anisotropy=8;
+  return { map, rmt, bump:new THREE.CanvasTexture(mask), bumpScale:fin.bump };
+}
+const front=new THREE.MeshStandardMaterial({ name:'frente', roughness:1, metalness:1 });
+const back=new THREE.MeshStandardMaterial({ name:'verso', roughness:1, metalness:1 });
+const edge=new THREE.MeshStandardMaterial({ name:'borda', roughness:0.9, metalness:0 });
+function applyFace(mat, drawFn, finKey, white){
+  setInk(!!white); const t=buildFace(drawFn, finKey, white); setInk(false);
+  ['map','roughnessMap','bumpMap'].forEach(k=>mat[k]&&mat[k].dispose());
+  mat.map=t.map; mat.roughnessMap=t.rmt; mat.metalnessMap=t.rmt; mat.bumpMap=t.bump; mat.bumpScale=t.bumpScale; mat.needsUpdate=true;
+}
+function rebuild(){
+  validate();
+  const f=FRONTS.find(x=>x.id===S.fl)||FRONTS[0], bk=BACKS.find(x=>x.id===S.bl)||BACKS[0];
+  applyFace(front, f.draw, S.frente); applyFace(back, bk.draw, S.verso, S.bc==='branco');
+  edge.color.set(PAPERS[S.paper].edge);
+  renderPrice();
+}
+
+// ---------- model: 88 × 48 mm, ~0,4 mm
+const CW=0.088, CH=0.048, CT=0.0004, GAP=0.012;
+const RAD=CW*24/1100;
+const shape=new THREE.Shape(); { const w=CW/2, hh=CH/2, q=RAD;
+  shape.moveTo(-w+q,-hh); shape.lineTo(w-q,-hh); shape.quadraticCurveTo(w,-hh,w,-hh+q); shape.lineTo(w,hh-q); shape.quadraticCurveTo(w,hh,w-q,hh);
+  shape.lineTo(-w+q,hh); shape.quadraticCurveTo(-w,hh,-w,hh-q); shape.lineTo(-w,-hh+q); shape.quadraticCurveTo(-w,-hh,-w+q,-hh); }
+function faceGeo(){ const g=new THREE.ShapeGeometry(shape,12); const p=g.attributes.position, uv=g.attributes.uv;
+  for(let i=0;i<p.count;i++) uv.setXY(i, p.getX(i)/CW+0.5, p.getY(i)/CH+0.5); uv.needsUpdate=true; return g; }
+const edgeGeo=new THREE.ExtrudeGeometry(shape,{depth:CT,bevelEnabled:false,curveSegments:12}); edgeGeo.translate(0,0,-CT/2);
+const frontGeo=faceGeo(); frontGeo.translate(0,0,CT/2+0.00002);
+const backGeo=faceGeo(); backGeo.rotateY(Math.PI); backGeo.translate(0,0,-CT/2-0.00002);
+const model=new THREE.Group(); model.name='isla_cartoes';
+const cards=[['cartao_frente',0,-(CW+GAP)/2],['cartao_verso',Math.PI,(CW+GAP)/2]].map(([n,ry,x],i)=>{
+  const g=new THREE.Group(); g.name=n; g.position.x=x; g.userData={phase:i*1.7}; g.rotation.y=ry;
+  const e=new THREE.Mesh(edgeGeo,edge); e.name=n+'_borda'; const fm=new THREE.Mesh(frontGeo,front); fm.name=n+'_frente'; const bm=new THREE.Mesh(backGeo,back); bm.name=n+'_verso';
+  g.add(e,fm,bm); model.add(g); return g; });
+rebuild();
+stage.setObject(model);
+
+// ---------- light: studio env on both sides + key lights that follow the pointer
+const scene=stage._scene, renderer=stage._renderer, camera=stage._camera, controls=stage._controls, key=stage._key;
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.05;
+scene.traverse(o=>{ if(o.isHemisphereLight) o.intensity=0.12; else if(o.isDirectionalLight && o!==key) o.intensity=0.25; });
+key.intensity=1.6;
+const keyB=new THREE.DirectionalLight(0xffffff,1.6); scene.add(keyB);
+stage._ground.visible=false; [key,keyB].forEach(l=>l.castShadow=false); key.castShadow=false;
+const FLOOR=-CH/2-0.022;
+const sc=document.createElement('canvas'); sc.width=256; sc.height=256; { const x=sc.getContext('2d'); const g=x.createRadialGradient(128,128,0,128,128,128); g.addColorStop(0,'rgba(0,0,0,0.55)'); g.addColorStop(0.45,'rgba(0,0,0,0.22)'); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(0,0,256,256); }
+const stex=new THREE.CanvasTexture(sc);
+const blobs=cards.map(c=>{ const m=new THREE.Mesh(new THREE.PlaneGeometry(CW*1.3,0.045), new THREE.MeshBasicMaterial({map:stex,transparent:true,depthWrite:false,opacity:0.5})); m.rotation.x=-Math.PI/2; m.position.set(c.position.x,FLOOR,0); m.renderOrder=-1; scene.add(m); return m; });
+const env=new THREE.Scene(); env.background=new THREE.Color(0x030303);
+const box=(w,h,x,y,z,i)=>{ const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({color:new THREE.Color(i,i,i), side:THREE.DoubleSide})); m.position.set(x,y,z); m.lookAt(0,0,0); env.add(m); };
+[1,-1].forEach(s=>{ box(8,4,0,5,5*s,7); box(2,8,-6,1,2*s,5); box(1.5,6,6,2,1*s,3.5); box(12,1.2,0,-2,6*s,2.2); box(6,6,0,1,8*s,0.9); });
+const pm=new THREE.PMREMGenerator(renderer); scene.environment=pm.fromScene(env,0.03).texture;
+controls.target.set(0,-0.004,0);
+const orderEl=document.getElementById('order');
+function frame(){ const w=stage.clientWidth||1, hh=stage.clientHeight||1, asp=w/hh; const bar=orderEl.offsetHeight+16; document.documentElement.style.setProperty('--bar',bar+'px');
+  const avail=Math.max(0.34,(w-2*268)/w), availH=Math.max(0.3,(hh-bar-32)/hh);
+  const dW=(CW*2+GAP)*1.12/avail/2/(Math.tan(22.5*Math.PI/180)*asp), dH=CH*1.6/availH/2/Math.tan(22.5*Math.PI/180);
+  camera.position.set(0.004,0.008,Math.max(0.16,dW,dH)); camera.setViewOffset(w,hh,0,bar/2,w,hh); controls.update(); }
+frame(); new ResizeObserver(frame).observe(stage); new ResizeObserver(frame).observe(orderEl); controls.minDistance=0.07; controls.maxDistance=0.5; controls.update();
+let nx=0.3, ny=-0.2, cx=nx, cy=ny;
+addEventListener('pointermove', e=>{ if(e.target.closest && e.target.closest('#panel,#verso,#order')) return; nx=e.clientX/innerWidth*2-1; ny=e.clientY/innerHeight*2-1; });
+const t0=performance.now();
+(function tick(){
+  const t=(performance.now()-t0)/1000;
+  let tx=nx, ty=ny;
+  cx+=(tx-cx)*0.06; cy+=(ty-cy)*0.06;
+  scene.environmentRotation.set(cy*0.6, cx*1.4, 0);
+  key.position.set(cx*0.25, 0.18-cy*0.18, 0.22); keyB.position.set(-cx*0.25, 0.18-cy*0.18, -0.22);
+  cards.forEach((g,i)=>{ const p=g.userData.phase; g.rotation.x=Math.sin(t*0.7+p)*0.03; g.position.y=Math.sin(t*0.9+p)*0.0012; const k=1-g.position.y/0.004; blobs[i].material.opacity=0.5*k; blobs[i].scale.set(1+g.position.y*40,1,1); });
+  requestAnimationFrame(tick);
+})();
+
+// ---------- UI
+function chips(id, entries, keyName, onPick, disabled){
+  const el=document.getElementById(id); el.innerHTML='';
+  entries.forEach(([k,label])=>{ const b=document.createElement('button'); b.textContent=label; b.setAttribute('aria-pressed', S[keyName]===k);
+    const needs=disabled&&disabled(k); if(needs) b.title='Troca o papel para Couchê fosco (Color Plus não aceita esse acabamento)';
+    b.onclick=()=>{ S[keyName]=k; if(needs) S.paper='fosca'; onPick&&onPick(k); save(); renderUI(); }; el.appendChild(b); });
+}
+const finEntries=()=>Object.entries(FINISH).map(([k,v])=>[k, k==='print'&&S.paper==='colorplus'?'Tinta branca':v.name]);
+const noUV=k=>S.paper==='colorplus'&&k==='uv';
+function renderUI(){
+  chips('c-flay', FRONTS.map(v=>[v.id,v.name]), 'fl', rebuild);
+  chips('c-blay', BACKS.map(v=>[v.id,v.name]), 'bl', rebuild);
+  chips('c-paper', Object.entries(PAPERS).map(([k,v])=>[k,v.name]), 'paper', rebuild);
+  chips('c-frente', finEntries(), 'frente', rebuild, noUV);
+  chips('c-verso', finEntries(), 'verso', rebuild, noUV);
+  chips('c-qty', [[500,'500 un.'],[1000,'1.000 un.']], 'qty', renderPrice);
+}
+renderUI();
+</script>
+</body>
+</html>
